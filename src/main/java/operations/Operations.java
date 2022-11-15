@@ -4,7 +4,7 @@ import java.sql.*;
 import connector.Connector;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-public class Operations {
+public class Operations implements IOperations {
 
 
     Statement statement = null;

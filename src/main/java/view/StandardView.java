@@ -1,10 +1,11 @@
 package view;
 import connector.Connector;
+import operations.IOperations;
 import operations.Operations;
 
 import java.util.Scanner;
 
-public class StandardView {
+public class StandardView implements IOperationsView {
 
     private Scanner sc;
     private Operations operations;
