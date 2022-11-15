@@ -8,6 +8,8 @@ public class Operations {
 
 
     Statement statement = null;
+
+    PreparedStatement st = null;
     ResultSet resultSet = null;
     Connection connection;
     Connector connector;
@@ -31,14 +33,14 @@ public class Operations {
 
     public boolean signUp(String login, String name, String surname, String password) {
         try {
-            PreparedStatement add = connection.prepareStatement("insert into Users values (?,?,?,?,?)");
-            add.setString(1, null);
-            add.setString(2, login);
-            add.setString(3, name);
-            add.setString(4, surname);
-            add.setString(5, BCrypt.hashpw(password, BCrypt.gensalt(10)));
+            st = connection.prepareStatement("insert into Users values (?,?,?,?,?)");
+            st.setString(1, null);
+            st.setString(2, login);
+            st.setString(3, name);
+            st.setString(4, surname);
+            st.setString(5, BCrypt.hashpw(password, BCrypt.gensalt(10)));
 
-            if(add.executeUpdate() == 1)
+            if(st.executeUpdate() == 1)
                 return true;
             else
                 return false;
@@ -51,8 +53,9 @@ public class Operations {
 
     public boolean signIn(String login, String passw) {
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("select * from Users where login ='" + login +"'");
+            st = connection.prepareStatement("select * from Users where login = ?");
+            st.setString(1, login);
+             resultSet = st.executeQuery();
             if(resultSet.next()) {
                 if(BCrypt.checkpw(passw, resultSet.getString("password"))) {
                     setIdUser(resultSet.getInt("idUser"));
@@ -78,8 +81,9 @@ public class Operations {
         int count;
         count = 0;
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("select * from Users where login ='" + login + "'");
+            st = connection.prepareStatement("select  * from Users where login = ?");
+            st.setString(1, login);
+            resultSet = st.executeQuery();
 
             //Checking uniqueness
             while (resultSet.next())
@@ -97,18 +101,99 @@ public class Operations {
 
     public void showAllNotes() {
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("select * from Notes where idUser = '" + this.idUser + "'");
+            st = connection.prepareStatement("select * from Notes where idUser = ?");
+            st.setInt(1, this.idUser);
+            resultSet = st.executeQuery();
+
             while(resultSet.next()) {
                 System.out.println(resultSet.getString("tytle"));
-                System.out.println("\n");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public boolean addNewNote(String tytle, String content) {
+        try {
+            st = connection.prepareStatement("Insert into Notes values (?, ?, ?, ?)");
+            st.setString(1, null);
+            st.setString(2, tytle);
+            st.setString(3, content);
+            st.setInt(4, this.idUser);
+            return st.executeUpdate() == 1;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    public boolean findNote(String tytle) {
+        try {
+            st = connection.prepareStatement("select * from Notes where idUser = ? and tytle = ?");
+            st.setInt(1, this.idUser);
+            st.setString(2, tytle);
+            resultSet = st.executeQuery();
+
+            if(resultSet.next())
+                return true;
+            else
+                return false;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+
+    public boolean editNote(String tytle, String content) {
+        try {
+            PreparedStatement st = connection.prepareStatement("update Notes set content = ? where idUser = ? and tytle = ?");
+            st.setString(1, content);
+            st.setInt(2, this.idUser);
+            st.setString(3, tytle);
+            st.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    public boolean showContent(String tytle) {
+        try {
+            st = connection.prepareStatement("select content from Notes where idUser = ? and tytle = ?");
+            st.setInt(1, this.idUser);
+            st.setString(2, tytle);
+            resultSet = st.executeQuery();
+            resultSet.next();
+            System.out.println(resultSet.getString("content"));
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    public boolean deleteNote(String tytle) {
+        try {
+            st = connection.prepareStatement("delete from Notes where idUser = ? and tytle = ?");
+            st.setInt(1, this.idUser);
+            st.setString(2, tytle);
+            st.executeUpdate();
+            return true;
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
 
 
     }
+
 
 
 

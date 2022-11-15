@@ -25,11 +25,12 @@ public class StandardView {
 
 
     private void printMenu2() {
-        System.out.println("1 - Show all notes");
-        System.out.println("2 - Modify note");
-        System.out.println("3 - Add new note");
-        System.out.println("4 - Delete note");
-        System.out.println("5 - Log out");
+        System.out.println("1 - Show the list of your notes");
+        System.out.println("2 - Show the content of chosen note");
+        System.out.println("3 - Modify note");
+        System.out.println("4 - Add new note");
+        System.out.println("5 - Delete note");
+        System.out.println("6 - Log out");
 
 
 
@@ -89,38 +90,74 @@ public class StandardView {
                     login = getText("Enter login: ");
                     passw = getText("Enter password: ");
                     if (operations.signIn(login, passw)) {
-                        System.out.println("Signed in successfully\n");
+                        System.out.println("\nSigned in successfully\n");
                         do {
                             printMenu2();
                             do {
-                                choice = getChoice("Choose action: ");
-                            } while (choice < 1 || choice > 5);
+                                choice = getChoice("\nChoose action: ");
+                            } while (choice < 1 || choice > 6);
 
                             switch (choice) {
                                 case 1:
+                                    System.out.println("\nYour notes list:");
+                                    operations.showAllNotes();
+                                    System.out.println("\n");
                                     break;
-
                                 case 2:
 
+                                    String tytle = getText("Enter the tytle of note that you would like to read: ");
+                                    if (operations.findNote(tytle)) {
+                                        System.out.println("\n\'" + tytle +"\':");
+                                        operations.showContent(tytle);
+                                        System.out.println("\n");
+                                    } else {
+                                        System.out.println("\nNote with given title doesn't exist.\n");
+                                    }
                                     break;
 
-
                                 case 3:
+
+                                    tytle = getText("\nEnter the tytle of note that you would like to modify: ");
+                                    if (operations.findNote(tytle)) {
+                                        String content = getText("Enter the new content of note \'" + tytle + "\': \n");
+                                        if(operations.editNote(tytle, content))
+                                            System.out.println("\nYour note has been successfully modified.\n");
+                                    } else {
+                                        System.out.println("\nNote with given title doesn't exist.\n");
+                                    }
 
                                     break;
 
                                 case 4:
+                                    tytle = getText("\nEnter the tytle of your new note: ");
+                                    String content = getText("\nEnter content of your new note: ");
+                                    if (operations.addNewNote(tytle, content))
+                                        System.out.println("\nNote \'" + tytle + "' has been successfully added to your notes.\n");
 
                                     break;
 
-
                                 case 5:
-                                    System.out.println("Logging out");
+                                    tytle = getText("\nEnter the tytle of note that you would like to delete: ");
+                                    if (operations.findNote(tytle)) {
+                                        if(operations.deleteNote(tytle))
+                                            System.out.println("\nYour note has been successfully deleted.\n");
+                                    } else {
+                                        System.out.println("\nNote with given title doesn't exist.\n");
+                                    }
+
+                                    break;
+
+                                case 6:
+                                    System.out.println("\nLogging out\n");
+                                    operations.setIdUser(0);
+                                    break;
+
+                                default:
+                                    System.out.println("\nWrong choice.\n");
                                     break;
                             }
 
-                        } while (choice != 5);
-
+                        } while (choice != 6);
 
                     }
                     break;
@@ -145,10 +182,6 @@ public class StandardView {
 
             }
         }
-
-
-
-
 
         connector.closeConnection();
     }
